@@ -1,6 +1,6 @@
-#include <iostream>
+#include "BaseFileHeader.h"
 
-int main() {
-    std::cout << "Hello World!";
+int main(int argc, char* argv[]) {
+    fileHeader(argv[0]);
     return 0;
 }
