@@ -64,6 +64,46 @@ void printtime(time_t stamp) {
 	printf("%s\n", buffer);
 }
 
+void printsubsystem(WORD i) {
+	switch (i) {
+	case IMAGE_SUBSYSTEM_UNKNOWN:
+		printf("Subsystem: Unknown subsystem\n");
+		break;
+
+	case  IMAGE_SUBSYSTEM_NATIVE:
+		printf("Subsystem: Doesn't require a subsystem\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_WINDOWS_GUI:
+		printf("Subsystem: Windows GUI subsystem\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_WINDOWS_CUI:
+		printf("Subsystem: Windows character subsystem\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_OS2_CUI:
+		printf("Subsystem: OS/2 character subsystem\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_POSIX_CUI:
+		printf("Subsystem: Posix character subsystem\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_NATIVE_WINDOWS:
+		printf("Subsystem: Win9x driver\n");
+		break;
+
+	case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
+		printf("Subsystem: Windows CE subsystem\n");
+		break;
+
+	default:
+		printf("Subsystem: Other\n");
+	}
+
+}
+
 void fileHeader(LPCSTR fileLocaion) {
 	HANDLE fileHandle, mappingHandle;
 	LPVOID mapPointer;
@@ -99,8 +139,6 @@ void fileHeader(LPCSTR fileLocaion) {
 	}
 	coffheader = *(IMAGE_FILE_HEADER*)((BYTE*)mapPointer + offsetPE + 4);
 
-	pmachinetype(coffheader.Machine);
-	printtime(coffheader.TimeDateStamp);
 
 	opHeader = (BYTE*)mapPointer + offsetPE + 24;
 	bit += (*(WORD*)(opHeader) == 0x20b); // bit == 2 if it is PE32+ 
@@ -125,5 +163,9 @@ void fileHeader(LPCSTR fileLocaion) {
 		ImageBase = *(ULONGLONG*)(opHeader + 24);
 	}
 	//printf("%x\n", ImageBase);
+
+	printsubsystem(*(WORD*)(opHeader + 68));
+	pmachinetype(coffheader.Machine);
+	printtime(coffheader.TimeDateStamp);
 }
 
