@@ -216,7 +216,8 @@ void fileHeader(LPCSTR fileLocaion) {
 	printdatadirectories(data_directory);
 	printsectionstable(SectionTable, coffheader.NumberOfSections);
 
-	
+	CloseHandle(mappingHandle);
+	CloseHandle(fileHandle);
 
 }
 
