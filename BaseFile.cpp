@@ -127,6 +127,18 @@ void printdatadirectories(PIMAGE_DATA_DIRECTORY data_directory) {
 	
 }
 
+void printsectionstable(PIMAGE_SECTION_HEADER SectionTable, WORD NumberOfSections) {
+
+	printf("\n     Name  VirtualSize  VirtualAddress  SizeOfRawData  PointerToRawData  Characteristics\n");
+	for (int i = 0; i < NumberOfSections; i++) {
+		printf("%9s %12x %15x %14x %17x %16x  ", (SectionTable+i)->Name, (SectionTable + i)->Misc.VirtualSize, (SectionTable + i)->VirtualAddress, (SectionTable + i)->SizeOfRawData, (SectionTable + i)->PointerToRawData, (SectionTable + i)->Characteristics);
+		if ((SectionTable + i)->Characteristics & IMAGE_SCN_MEM_EXECUTE) printf(" Executable");
+		if ((SectionTable + i)->Characteristics & IMAGE_SCN_MEM_READ) printf(" Readable");
+		if ((SectionTable + i)->Characteristics & IMAGE_SCN_MEM_WRITE) printf(" Writable");
+			printf("\n");
+	}
+}
+
 void fileHeader(LPCSTR fileLocaion) {
 	HANDLE fileHandle, mappingHandle;
 	LPVOID mapPointer;
@@ -194,7 +206,7 @@ void fileHeader(LPCSTR fileLocaion) {
 		// bit = 2 if program is 64 bits
 	}
 
-	BYTE* SectionTable = (opHeader + coffheader.SizeOfOptionalHeader); // start adress if SectionTable
+	PIMAGE_SECTION_HEADER SectionTable = (PIMAGE_SECTION_HEADER)(opHeader + coffheader.SizeOfOptionalHeader); // start adress if SectionTable
 	
 	
 
@@ -202,5 +214,9 @@ void fileHeader(LPCSTR fileLocaion) {
 	pmachinetype(coffheader.Machine);
 	printtime(coffheader.TimeDateStamp);
 	printdatadirectories(data_directory);
+	printsectionstable(SectionTable, coffheader.NumberOfSections);
+
+	
+
 }
 
