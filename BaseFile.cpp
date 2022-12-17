@@ -117,11 +117,11 @@ void printdatadirectories(PIMAGE_DATA_DIRECTORY data_directory) {
 	printf("Global Ptr:              %x   %x\n", data_directory[8].VirtualAddress, data_directory[8].Size);
 	printf("TLS Table:               %x   %x\n", data_directory[9].VirtualAddress, data_directory[9].Size);
 	printf("Load Config Table:       %x   %x\n", data_directory[10].VirtualAddress, data_directory[10].Size);
-	printf("Bound Import:            %x   %x\n", data_directory[12].VirtualAddress, data_directory[12].Size);
-	printf("IAT:                     %x   %x\n", data_directory[13].VirtualAddress, data_directory[13].Size);
-	printf("Delay Import Descriptor: %x   %x\n", data_directory[14].VirtualAddress, data_directory[14].Size);
-	printf("CLR Runtime Header:      %x   %x\n", data_directory[15].VirtualAddress, data_directory[15].Size);
-	printf("Reserved:                %x   %x\n", data_directory[11].VirtualAddress, data_directory[15].Size);
+	printf("Bound Import:            %x   %x\n", data_directory[11].VirtualAddress, data_directory[11].Size);
+	printf("IAT:                     %x   %x\n", data_directory[12].VirtualAddress, data_directory[12].Size);
+	printf("Delay Import Descriptor: %x   %x\n", data_directory[13].VirtualAddress, data_directory[13].Size);
+	printf("CLR Runtime Header:      %x   %x\n", data_directory[14].VirtualAddress, data_directory[14].Size);
+	printf("Reserved:                %x   %x\n", data_directory[15].VirtualAddress, data_directory[15].Size);
 
 
 	
@@ -136,7 +136,7 @@ void fileHeader(LPCSTR fileLocaion) {
 	IMAGE_DATA_DIRECTORY data_directory[16];
 	
 	BYTE* opHeader; // pointer of optional header
-	int bit = 1;   // 1 for 32 bit , 2 for 64 bit, determine by optional header magic number
+	boolean pe32plus = 0;   // 0 for 32 bit , 1 for 64 bit, determine by optional header magic number
 				   // Used as a multiplicity of number, because size of some fields is double for 64bit
 	
 	
@@ -165,10 +165,10 @@ void fileHeader(LPCSTR fileLocaion) {
 
 
 	opHeader = (BYTE*)mapPointer + offsetPE + 24;
-	bit += (*(WORD*)(opHeader) == 0x20b); // bit == 2 if it is PE32+ 
+	pe32plus = (*(WORD*)(opHeader) == 0x20b); // bit == 1 if it is PE32+ 
 
 	if (coffheader.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE) {
-		printf("File is %d-bit executable\n",32*bit);
+		printf("File is %d-bit executable\n",32*(pe32plus + 1));
 	}
 
 	if (coffheader.Characteristics & IMAGE_FILE_DLL) {
@@ -180,7 +180,7 @@ void fileHeader(LPCSTR fileLocaion) {
 	}
 	AddressOfEntryPoint = *(DWORD*)(opHeader + 16);
 
-	if (bit == 1) {
+	if (!pe32plus) {
 		ImageBase = *(DWORD*)(opHeader + 28);
 	}
 	else {
@@ -190,10 +190,12 @@ void fileHeader(LPCSTR fileLocaion) {
 
 	//base offset 96 bits, each table is 8 bits, 16 is offfet for 64 bits program
 	for (int i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++) {
-		data_directory[i] = *(PIMAGE_DATA_DIRECTORY)(opHeader + i * 8 + 96 + 16 * (bit-1));
+		data_directory[i] = *(PIMAGE_DATA_DIRECTORY)(opHeader + i * 8 + 96 + 16 * (pe32plus));
 		// bit = 2 if program is 64 bits
 	}
 
+	BYTE* SectionTable = (opHeader + coffheader.SizeOfOptionalHeader); // start adress if SectionTable
+	
 	
 
 	printsubsystem(*(WORD*)(opHeader + 68));
