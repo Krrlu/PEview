@@ -105,7 +105,7 @@ void printsubsystem(WORD i) {
 }
 
 void printdatadirectories(PIMAGE_DATA_DIRECTORY data_directory) {
-	printf("                       RVA SIZE\n");
+	printf("                         RVA     SIZE\n");
 	printf("Export Table:            %x   %x\n", data_directory[0].VirtualAddress, data_directory[0].Size);
 	printf("Import Table:            %x   %x\n", data_directory[1].VirtualAddress, data_directory[1].Size);
 	printf("Resource Table:          %x   %x\n", data_directory[2].VirtualAddress, data_directory[2].Size);
